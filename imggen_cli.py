@@ -438,6 +438,36 @@ def cmd_auth(argv: list[str]):
 
 
 # ---------------------------------------------------------------------------
+# setup-skill subcommand
+# ---------------------------------------------------------------------------
+
+SKILL_URL = "https://raw.githubusercontent.com/mihornak/imggen/main/skill/SKILL.md"
+SKILL_DIR = os.path.expanduser("~/.claude/skills/generate-image")
+SKILL_FILE = os.path.join(SKILL_DIR, "SKILL.md")
+
+
+def cmd_setup_skill():
+    """Download and install the Claude Code skill."""
+    claude_dir = os.path.expanduser("~/.claude")
+    if not os.path.isdir(claude_dir):
+        die("~/.claude not found. Install Claude Code first.")
+
+    print("Installing Claude Code skill...")
+    try:
+        req = urllib.request.Request(SKILL_URL)
+        resp = urllib.request.urlopen(req, timeout=15)
+        content = resp.read()
+    except Exception as e:
+        die(f"Failed to download skill: {e}")
+
+    os.makedirs(SKILL_DIR, exist_ok=True)
+    with open(SKILL_FILE, "wb") as f:
+        f.write(content)
+    print(f"Skill installed to {SKILL_FILE}")
+    print("Restart Claude Code to use: /generate-image")
+
+
+# ---------------------------------------------------------------------------
 # --list-models
 # ---------------------------------------------------------------------------
 
@@ -475,9 +505,12 @@ def load_prompts_from_file(path: str) -> list[str]:
 
 
 def main():
-    # Intercept 'auth' subcommand before argparse
+    # Intercept subcommands before argparse
     if len(sys.argv) >= 2 and sys.argv[1] == "auth":
         cmd_auth(sys.argv[2:])
+        return
+    if len(sys.argv) >= 2 and sys.argv[1] == "setup-skill":
+        cmd_setup_skill()
         return
 
     parser = argparse.ArgumentParser(
