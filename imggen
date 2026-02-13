@@ -31,7 +31,7 @@ import time
 import urllib.request
 import urllib.error
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # ---------------------------------------------------------------------------
 # Provider / model registries
