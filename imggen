@@ -31,7 +31,7 @@ import time
 import urllib.request
 import urllib.error
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 # ---------------------------------------------------------------------------
 # Provider / model registries
@@ -74,6 +74,21 @@ FREEPIK_BASE_URL = "https://api.freepik.com/v1/ai"
 
 # Freepik async models (use task-based polling)
 FREEPIK_ASYNC_MODELS = {"mystic"}
+
+# Aspect ratio support
+GEMINI_ASPECT_RATIOS = {"1:1", "2:3", "3:2", "3:4", "4:3", "4:5", "5:4", "9:16", "16:9", "21:9"}
+
+FREEPIK_ASPECT_MAP = {
+    "1:1": "square_1_1",
+    "2:3": "portrait_2_3",
+    "3:2": "standard_3_2",
+    "3:4": "traditional_3_4",
+    "4:3": "classic_4_3",
+    "4:5": "social_post_4_5",
+    "5:4": "social_5_4",
+    "9:16": "social_story_9_16",
+    "16:9": "widescreen_16_9",
+}
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -217,7 +232,8 @@ def get_api_key(provider: str) -> str:
 
 def generate_gemini(prompt: str, model_id: str, api_key: str,
                     ref_images: list[str] | None = None,
-                    negative: str | None = None) -> tuple[bytes, str]:
+                    negative: str | None = None,
+                    aspect_ratio: str | None = None) -> tuple[bytes, str]:
     """Call the Gemini API. Returns (image_bytes, extension)."""
     endpoint = f"{GEMINI_BASE_URL}/{model_id}:generateContent?key={api_key}"
 
@@ -227,9 +243,16 @@ def generate_gemini(prompt: str, model_id: str, api_key: str,
         parts.append({"inline_data": {"mime_type": mime, "data": b64}})
     parts.append({"text": prompt})
 
+    gen_config: dict = {"responseModalities": ["image", "text"]}
+    if aspect_ratio:
+        if aspect_ratio not in GEMINI_ASPECT_RATIOS:
+            raise ValueError(f"Gemini does not support aspect ratio '{aspect_ratio}'. "
+                             f"Supported: {', '.join(sorted(GEMINI_ASPECT_RATIOS))}")
+        gen_config["imageConfig"] = {"aspectRatio": aspect_ratio}
+
     payload = {
         "contents": [{"parts": parts}],
-        "generationConfig": {"responseModalities": ["image", "text"]},
+        "generationConfig": gen_config,
     }
 
     body = api_request(endpoint, payload)
@@ -251,15 +274,23 @@ def generate_gemini(prompt: str, model_id: str, api_key: str,
 
 
 def generate_freepik_sync(prompt: str, model_id: str, api_key: str,
-                          negative: str | None = None) -> tuple[bytes, str]:
+                          negative: str | None = None,
+                          aspect_ratio: str | None = None) -> tuple[bytes, str]:
     """Call the Freepik sync text-to-image API. Returns (image_bytes, extension)."""
     endpoint = f"{FREEPIK_BASE_URL}/text-to-image"
     headers = {"x-freepik-api-key": api_key}
 
+    image_size = "square_1_1"
+    if aspect_ratio:
+        if aspect_ratio not in FREEPIK_ASPECT_MAP:
+            raise ValueError(f"Freepik does not support aspect ratio '{aspect_ratio}'. "
+                             f"Supported: {', '.join(sorted(FREEPIK_ASPECT_MAP))}")
+        image_size = FREEPIK_ASPECT_MAP[aspect_ratio]
+
     payload = {
         "prompt": prompt,
         "num_images": 1,
-        "image_size": "square_1_1",
+        "image_size": image_size,
         "model": model_id,
     }
     if negative:
@@ -277,7 +308,8 @@ def generate_freepik_sync(prompt: str, model_id: str, api_key: str,
 
 def generate_freepik_mystic(prompt: str, api_key: str,
                             ref_images: list[str] | None = None,
-                            negative: str | None = None) -> tuple[bytes, str]:
+                            negative: str | None = None,
+                            aspect_ratio: str | None = None) -> tuple[bytes, str]:
     """Call the Freepik Mystic async API. Returns (image_bytes, extension)."""
     endpoint = f"{FREEPIK_BASE_URL}/mystic"
     headers = {"x-freepik-api-key": api_key}
@@ -287,6 +319,11 @@ def generate_freepik_mystic(prompt: str, api_key: str,
         "num_images": 1,
         "resolution": "2k",
     }
+    if aspect_ratio:
+        if aspect_ratio not in FREEPIK_ASPECT_MAP:
+            raise ValueError(f"Freepik does not support aspect ratio '{aspect_ratio}'. "
+                             f"Supported: {', '.join(sorted(FREEPIK_ASPECT_MAP))}")
+        payload["aspect_ratio"] = FREEPIK_ASPECT_MAP[aspect_ratio]
     if negative:
         payload["negative_prompt"] = negative
 
@@ -331,17 +368,20 @@ def generate_freepik_mystic(prompt: str, api_key: str,
 
 def generate_freepik(prompt: str, model_id: str, api_key: str,
                      ref_images: list[str] | None = None,
-                     negative: str | None = None) -> tuple[bytes, str]:
+                     negative: str | None = None,
+                     aspect_ratio: str | None = None) -> tuple[bytes, str]:
     """Dispatch to sync or async Freepik API."""
     if model_id in FREEPIK_ASYNC_MODELS:
-        return generate_freepik_mystic(prompt, api_key, ref_images=ref_images, negative=negative)
+        return generate_freepik_mystic(prompt, api_key, ref_images=ref_images,
+                                       negative=negative, aspect_ratio=aspect_ratio)
 
     # Sync models don't support reference images
     if ref_images:
         print(f"  Warning: Freepik '{model_id}' does not support reference images — ignoring --ref",
               file=sys.stderr)
 
-    return generate_freepik_sync(prompt, model_id, api_key, negative=negative)
+    return generate_freepik_sync(prompt, model_id, api_key, negative=negative,
+                                 aspect_ratio=aspect_ratio)
 
 
 # ---------------------------------------------------------------------------
@@ -527,6 +567,8 @@ def main():
                         help="Read prompts from a text file (one per line)")
     parser.add_argument("--model", "-m", default=f"{DEFAULT_ALIAS}",
                         help=f"Model alias or provider:alias (default: {DEFAULT_ALIAS})")
+    parser.add_argument("--aspect", "-a", default=None, metavar="W:H",
+                        help="Aspect ratio, e.g. 16:9, 9:16, 4:3, 3:4, 1:1 (default: 1:1)")
     parser.add_argument("--negative", "-n", default=None, metavar="PROMPT",
                         help="Negative prompt (Freepik only, ignored by Gemini)")
     parser.add_argument("--out", "-o", default=".", help="Output directory (default: current dir)")
@@ -591,6 +633,7 @@ def main():
                 prompt, model_id, api_key,
                 ref_images=args.ref or None,
                 negative=args.negative,
+                aspect_ratio=args.aspect,
             )
             path = os.path.join(args.out, f"{label}.{ext}")
             with open(path, "wb") as f:
