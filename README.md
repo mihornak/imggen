@@ -1,4 +1,5 @@
-<img width="1024" height="400" alt="Nano Banana + Freepik CLI Claude Code skill" src="https://github.com/user-attachments/assets/3401adad-8c4c-4f95-b362-4e0392145e18" />
+<img width="1024" height="168" alt="Nano Banana + Freepik" src="https://github.com/user-attachments/assets/50ccaec4-72fc-4741-bfbf-5131829db13a" />
+
 
 # imggen
 
