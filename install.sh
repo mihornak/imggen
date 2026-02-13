@@ -4,6 +4,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_SRC="$SCRIPT_DIR/skill/SKILL.md"
 CLI_SRC="$SCRIPT_DIR/imggen"
+REPO="mihornak/imggen"
+
+# Detect whether we're running from the repo or piped from curl
+IN_REPO=true
+if [[ ! -f "$CLI_SRC" ]]; then
+    IN_REPO=false
+fi
 
 # --- Defaults ---
 BIN_DIR="${HOME}/.local/bin"
@@ -73,9 +80,25 @@ fi
 # --- Install CLI ---
 info "Installing CLI..."
 mkdir -p "$BIN_DIR"
-ln -sf "$CLI_SRC" "$BIN_DIR/imggen"
-chmod +x "$CLI_SRC"
-info "Symlinked: $BIN_DIR/imggen -> $CLI_SRC"
+
+if [[ "$IN_REPO" == true ]]; then
+    ln -sf "$CLI_SRC" "$BIN_DIR/imggen"
+    chmod +x "$CLI_SRC"
+    info "Symlinked: $BIN_DIR/imggen -> $CLI_SRC"
+else
+    info "Downloading latest imggen from GitHub..."
+    DOWNLOAD_URL="https://github.com/${REPO}/releases/latest/download/imggen"
+    if command -v curl &>/dev/null; then
+        curl -fsSL "$DOWNLOAD_URL" -o "$BIN_DIR/imggen"
+    elif command -v wget &>/dev/null; then
+        wget -qO "$BIN_DIR/imggen" "$DOWNLOAD_URL"
+    else
+        error "Neither curl nor wget found. Cannot download imggen."
+        exit 1
+    fi
+    chmod +x "$BIN_DIR/imggen"
+    info "Downloaded imggen to $BIN_DIR/imggen"
+fi
 
 # Check if BIN_DIR is on PATH
 if ! echo "$PATH" | tr ':' '\n' | grep -qx "$BIN_DIR"; then
@@ -89,13 +112,17 @@ fi
 
 # --- Install Claude Code skill ---
 if [[ "$SKIP_SKILL" == false ]]; then
-    if [[ -d "${HOME}/.claude" ]]; then
-        info "Installing Claude Code skill..."
-        mkdir -p "$SKILL_DIR"
-        cp "$SKILL_SRC" "$SKILL_DIR/SKILL.md"
-        info "Skill installed to $SKILL_DIR/SKILL.md"
-    else
-        warn "~/.claude not found — skipping skill install (Claude Code not detected)"
+    if [[ "$IN_REPO" == true ]] && [[ -f "$SKILL_SRC" ]]; then
+        if [[ -d "${HOME}/.claude" ]]; then
+            info "Installing Claude Code skill..."
+            mkdir -p "$SKILL_DIR"
+            cp "$SKILL_SRC" "$SKILL_DIR/SKILL.md"
+            info "Skill installed to $SKILL_DIR/SKILL.md"
+        else
+            warn "~/.claude not found — skipping skill install (Claude Code not detected)"
+        fi
+    elif [[ "$IN_REPO" == false ]]; then
+        info "Skipping Claude Code skill (not available in download mode)"
     fi
 else
     info "Skipping Claude Code skill (--no-skill)"

@@ -2,36 +2,43 @@
 
 CLI and Claude Code skill for generating images using **Gemini** (Google Nano Banana) and **Freepik** AI providers.
 
-## Quick start
-
-```bash
-# 1. Clone / copy this directory to your machine
-# 2. Run the installer
-./install.sh
-
-# 3. Configure API keys (interactive)
-imggen auth
-
-# 4. Generate an image
-imggen "a golden retriever wearing a hoodie, studio photography"
-
-# Using Freepik
-imggen --model freepik:flux "a cat in space, digital art"
-```
-
 ## Installation
 
+### Homebrew
+
 ```bash
+brew install mihornak/imggen/imggen
+```
+
+### pipx / pip
+
+```bash
+pipx install imggen-cli    # recommended
+# or
+pip install imggen-cli
+```
+
+### Shell one-liner
+
+```bash
+curl -sSL https://raw.githubusercontent.com/mihornak/imggen/main/install.sh | bash
+```
+
+### From source
+
+```bash
+git clone https://github.com/mihornak/imggen.git
+cd imggen
 ./install.sh
 ```
 
 The installer will:
-- Symlink the `imggen` CLI to `~/.local/bin/` (override with `--bin /your/path`)
-- Install the Claude Code skill to `~/.claude/skills/generate-image/`
+- Symlink (or download) the `imggen` CLI to `~/.local/bin/` (override with `--bin /your/path`)
+- Install the Claude Code skill to `~/.claude/skills/generate-image/` (local clone only)
 - Check that Python 3 is available
 - Prompt to configure API keys (via `imggen auth`)
 
-### Options
+#### Installer options
 
 | Flag | Description |
 |------|-------------|
@@ -45,6 +52,19 @@ The installer will:
 rm ~/.local/bin/imggen
 rm -rf ~/.claude/skills/generate-image
 rm -rf ~/.config/imggen
+```
+
+## Quick start
+
+```bash
+# Configure API keys (interactive)
+imggen auth
+
+# Generate an image
+imggen "a golden retriever wearing a hoodie, studio photography"
+
+# Using Freepik
+imggen --model freepik:flux "a cat in space, digital art"
 ```
 
 ## Authentication

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imggen-cli"
+dynamic = ["version"]
+description = "Generate images using AI providers (Gemini, Freepik) from the command line"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+
+[project.scripts]
+imggen = "imggen_cli:main"
+
+[tool.setuptools]
+py-modules = ["imggen_cli"]
+
+[tool.setuptools.dynamic]
+version = {attr = "imggen_cli.__version__"}

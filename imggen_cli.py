@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """imggen — Generate images using multiple AI providers.
 
 Providers:
