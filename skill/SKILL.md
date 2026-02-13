@@ -52,6 +52,11 @@ imggen --model freepik:flux "a cat in space, digital art"
 # Use Freepik Mystic (async, supports ref images)
 imggen --model freepik:mystic "a dreamy landscape"
 
+# Aspect ratio (all providers)
+imggen --aspect 16:9 "a panoramic mountain landscape"
+imggen --aspect 9:16 "a phone wallpaper of northern lights"
+imggen -a 3:2 --model freepik:flux-realism "a cinematic portrait"
+
 # Negative prompt (Freepik only)
 imggen --model freepik:flux --negative "blurry, low quality" "a sharp photo of a mountain"
 
@@ -79,7 +84,7 @@ imggen auth gemini YOUR_KEY          # set a specific key
 imggen auth --status                 # check configured providers
 
 # Combine options
-imggen --model pro --out ./output --prefix "batch_" "prompt 1" "prompt 2"
+imggen --model pro --aspect 16:9 --out ./output --prefix "batch_" "prompt 1" "prompt 2"
 ```
 
 ## CLI reference
@@ -92,6 +97,7 @@ Options:
   --ref, -r IMAGE       Reference image (repeatable; Gemini: up to 14, Mystic: max 2)
   --list, -l FILE       Read prompts from a text file (one per line)
   --model, -m MODEL     Model alias or provider:alias (default: flash)
+  --aspect, -a W:H      Aspect ratio (default: 1:1). Values: 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9 (Gemini also: 21:9)
   --negative, -n TEXT   Negative prompt (Freepik only, ignored by Gemini)
   --out, -o DIR         Output directory (default: current dir)
   --prefix, -p STR      Filename prefix for generated images
@@ -132,6 +138,7 @@ The user's arguments after `/generate-image` are passed as `$ARGUMENTS`. Interpr
 - **Multiple prompts separated by newlines or numbered list**: Extract each prompt and pass them all to `imggen`
 - **A request to generate prompts**: Craft appropriate prompts first, then run `imggen`
 - **Prompt with image paths**: If the user mentions reference images or file paths, extract them as `--ref` flags
+- **Aspect ratio request**: If the user asks for a specific format (e.g., "widescreen", "portrait", "landscape"), use `--aspect` (16:9, 9:16, 4:3, etc.)
 - **"--list file.txt"** or similar flags: Pass through directly to `imggen`
 - **Model request**: If the user asks for a specific provider/model (e.g., "use Freepik Flux"), pass `--model` accordingly
 
