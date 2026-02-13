@@ -1,3 +1,5 @@
+<img width="1024" height="400" alt="Nano Banana + Freepik CLI Claude Code skill" src="https://github.com/user-attachments/assets/3401adad-8c4c-4f95-b362-4e0392145e18" />
+
 # imggen
 
 CLI and Claude Code skill for generating images using **Gemini** (Google Nano Banana) and **Freepik** AI providers.
