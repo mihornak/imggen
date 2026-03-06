@@ -30,7 +30,7 @@ import time
 import urllib.request
 import urllib.error
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 # ---------------------------------------------------------------------------
 # Provider / model registries
@@ -39,6 +39,7 @@ __version__ = "0.2.0"
 PROVIDERS = {
     "gemini": {
         "flash": "gemini-2.5-flash-image",
+        "flash2": "gemini-3.1-flash-image-preview",
         "pro": "gemini-3-pro-image-preview",
     },
     "freepik": {
@@ -54,6 +55,7 @@ PROVIDERS = {
 # Bare aliases resolve to (provider, alias) — backward compat
 BARE_ALIASES = {
     "flash": ("gemini", "flash"),
+    "flash2": ("gemini", "flash2"),
     "pro": ("gemini", "pro"),
 }
 

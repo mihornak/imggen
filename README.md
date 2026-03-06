@@ -79,6 +79,7 @@ imggen --out ./batch --prefix "campaign_" "prompt 1" "prompt 2"
 | Provider | Model | Best for |
 |----------|-------|----------|
 | gemini | `flash` | Fast iteration (default) |
+| gemini | `flash2` | Pro-level quality at flash speed |
 | gemini | `pro` | Higher quality, better detail |
 | freepik | `mystic` | Artistic styles, supports reference images |
 | freepik | `flux` | General purpose |

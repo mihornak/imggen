@@ -21,6 +21,7 @@ Generate images from text prompts using **Gemini** (Google Nano Banana) or **Fre
 | Provider | Alias | Model ID | Notes |
 |----------|-------|----------|-------|
 | gemini | `gemini:flash` | gemini-2.5-flash-image | Default. Fast, good for iteration |
+| gemini | `gemini:flash2` | gemini-3.1-flash-image-preview | Pro-level quality at flash speed |
 | gemini | `gemini:pro` | gemini-3-pro-image-preview | Higher quality, better detail |
 | freepik | `freepik:mystic` | mystic | Async. Supports ref images (max 2) |
 | freepik | `freepik:flux-fast` | flux-fast | Fast Flux generation |
@@ -29,7 +30,7 @@ Generate images from text prompts using **Gemini** (Google Nano Banana) or **Fre
 | freepik | `freepik:imagen-4` | imagen-4 | Google Imagen 4 via Freepik |
 | freepik | `freepik:seedream` | seedream | Seedream model |
 
-Bare aliases `flash` and `pro` still work for backward compatibility (resolve to Gemini).
+Bare aliases `flash`, `flash2`, and `pro` still work for backward compatibility (resolve to Gemini).
 
 ## Command patterns
 
@@ -108,6 +109,7 @@ Options:
 ## Provider selection guidance
 
 - **Gemini flash** (default): Fast iteration, good quality, supports reference images
+- **Gemini flash2**: Pro-level quality at flash speed, supports reference images
 - **Gemini pro**: Higher quality, better detail, supports reference images
 - **Freepik Mystic**: Creative/artistic styles, supports style + structure reference images (max 2), async
 - **Freepik Flux/Flux-realism**: Good for photorealistic images, fast, no ref image support
