@@ -1,7 +1,7 @@
 ---
 name: generate-image
 description: Generate images using Nano Banana (Gemini Image API) or Freepik AI. Use when user asks to generate, create, or make images from text prompts.
-allowed-tools: Bash(imggen:*)
+allowed-tools: Bash(imggen:*), Bash(command -v imggen), Bash(brew install mihornak/imggen/imggen:*), Bash(curl -sSL https://raw.githubusercontent.com/mihornak/imggen/main/install.sh*)
 argument-hint: <prompt or list of prompts>
 ---
 
@@ -9,9 +9,23 @@ argument-hint: <prompt or list of prompts>
 
 Generate images from text prompts using **Gemini** (Google Nano Banana) or **Freepik** AI providers.
 
-## Environment + auth
+## Prerequisites
 
-- `imggen` CLI must be installed and available on PATH (run `install.sh` from the imggen repo)
+Before running any imggen commands, check if it is installed:
+
+```bash
+command -v imggen
+```
+
+If imggen is not installed, tell the user and offer these install options:
+
+- **Homebrew** (recommended): `brew install mihornak/imggen/imggen`
+- **Direct download**: `curl -sSL https://raw.githubusercontent.com/mihornak/imggen/main/install.sh | bash`
+
+Do NOT attempt to generate images until imggen is confirmed installed.
+
+## Auth
+
 - Requires API keys — resolved in order: env var → `~/.config/imggen/keys.json` → error
 - Run `imggen auth` to configure keys interactively, or `imggen auth --status` to check
 - Do not print, echo, or inspect API keys
